@@ -587,11 +587,6 @@ fi
 res=$?
 [[ "$res" -ne 0 ]] && exit "$res"
 
-printf "dracut[I]: Setting the right permissions to %s\n" "$staging_dir/$outfilename" >&2
-chmod 600 "$staging_dir/$outfilename"
-res=$?
-[[ "$res" -ne 0 ]] && exit "$res"
-
 printf "dracut[I]: Copying %s to %s\n" "$staging_dir/$outfilename" "$outfile" >&2
 cp --reflink=auto "$staging_dir/$outfilename" "$outfile"
 exit $?
