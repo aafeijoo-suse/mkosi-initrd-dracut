@@ -16,7 +16,7 @@
 #
 
 Name:           mkosi-initrd-dracut
-Version:        0.0.1
+Version:        0.0.2~devel
 Release:        0
 Summary:        dracut compatibility wrapper for mkosi-initrd
 License:        GPL-2.0-or-later
