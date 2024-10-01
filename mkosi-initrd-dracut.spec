@@ -27,7 +27,7 @@ BuildRequires:  bash
 Requires:       bash
 Requires:       coreutils
 Requires:       grep
-Requires:       mkosi-initrd
+Requires:       mkosi-initrd > 24
 Provides:       dracut = 666
 Conflicts:      dracut
 
