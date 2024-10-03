@@ -526,28 +526,18 @@ if [[ "$regenerate_all" == "yes" ]]; then
     exit "$ret"
 fi
 
-#FIXME: mkosi-initrd fails to cp files directly to /boot
-# shellcheck disable=SC2155
-readonly staging_dir="$(mktemp -p "$TMP_DIR"/ -d -t mkosi-initrd-stagingXXXXXXXX)"
-if [[ ! -d "$staging_dir" ]]; then
-    printf "dracut[F]: Failed to create mkosi-initrd staging directory.\n" >&2
-    exit 1
-fi
-
-# Clean-up staging directory before exit
-trap 'rm -rf "$staging_dir" ; rm -rf "${MKOSI_INITRD_CONF_DIR%/*}"' EXIT
-
 # Set running kernel version if not set
 [[ -n "$kernel" ]] || kernel="$(uname -r)"
 
 # split outdir from outfile
 if [[ -n "$outfile" ]]; then
     abs_outfile=$(readlink -f "$outfile") && outfile="$abs_outfile"
-    outdir="${outfile%/*}"
-    [[ -n "$outdir" ]] || outdir="/"
 else
+    # Fixed SUSE old path, no BLS autodetection
     outfile="/boot/initrd-$kernel"
 fi
+outdir="${outfile%/*}"
+[[ -n "$outdir" ]] || outdir="/"
 outfilename="${outfile##*/}"
 
 # these options add to the stuff in the configuration file
@@ -561,7 +551,7 @@ outfilename="${outfile##*/}"
 cmd_options=()
 cmd_options+=("--kernel-version" "$kernel")
 cmd_options+=("--output" "$outfilename")
-cmd_options+=("--output-dir" "$staging_dir")
+cmd_options+=("--output-dir" "$outdir")
 [[ "$debug" == "yes" ]] && cmd_options+=("--debug")
 
 # translate dracut options into mkosi configuration options
@@ -584,9 +574,4 @@ fi
 # call mkosi-initrd
 # shellcheck disable=SC2046 disable=SC2048 disable=SC2086
 "$MKOSI_INITRD_BIN" $([[ ${#cmd_options[@]} -gt 0 ]] && echo ${cmd_options[*]})
-res=$?
-[[ "$res" -ne 0 ]] && exit "$res"
-
-printf "dracut[I]: Copying %s to %s\n" "$staging_dir/$outfilename" "$outfile" >&2
-cp --reflink=auto "$staging_dir/$outfilename" "$outfile"
 exit $?
